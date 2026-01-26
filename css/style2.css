@@ -1,0 +1,134 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    overflow: hidden;
+    top: 30%;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input {
+    width: auto;
+    /* Inputs will now take their natural width */
+    max-width: 350px;
+    /* This limits the maximum width */
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-left: auto;
+    /* Center the input */
+    margin-right: auto;
+    /* Center the input */
+}
+
+button {
+    width: auto;
+    /* Button will take its natural width */
+    max-width: 350px;
+    /* Button will have a max-width of 350px */
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: auto;
+    /* Center the button */
+    margin-right: auto;
+    /* Center the button */
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+label {
+    text-align: center;
+    color: #4CAF50;
+    cursor: pointer;
+    margin-top: 10px;
+    display: block;
+    font-size: 14px;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+
+/* Base styles for the forms */
+
+#registerForm,
+#loginForm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: transform 0.5s ease-in-out;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#loginForm {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+#login:checked~.form-container#loginForm {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+#register:checked~.form-container#registerForm {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+#login:checked~.form-container#registerForm {
+    transform: translateX(100%);
+}
+
+#register:checked~.form-container#loginForm {
+    transform: translateX(-100%);
+}
+
+p {
+    text-align: center;
+    color: #555;
+}
