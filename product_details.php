@@ -1,196 +1,123 @@
 <?php
-    include('header.php');
-    include('con.php');
-    
-    
-      
-        $p_id = $_GET['id'];
-        $sel = "SELECT * FROM product WHERE p_id='$p_id'";
-        $qu = mysqli_query($con,$sel);
-        $re = mysqli_fetch_array($qu);
+include('header.php');
+include('con.php');
 
-        //add to cart
-    
+$p_id = intval($_GET['id'] ?? 0);
+$sel  = "SELECT * FROM product WHERE p_id='$p_id'";
+$qu   = mysqli_query($con, $sel);
+$re   = mysqli_fetch_array($qu);
 
-        if(isset($_POST['cart'])){
-            if(!isset($_SESSION['user']['u_id'])){
-                header('location:login.php');
-            }
-            $uid = $_SESSION['user']['u_id'];
-            $pid = $re['p_id'];
-            $cart_name = $re['p_name'];
-            $cart_image = $re['p_image'];
-            $quantity = 1;
-            $cart_total = $re['p_price_des'];
-            
-           
+if (!$re) {
+    echo "<script>window.location.href='product.php';</script>";
+    exit();
+}
 
-            $check_cart = "SELECT * FROM cart WHERE u_id='$uid' AND c_name='$cart_name'";
-            $check_cart_ex = mysqli_query($con, $check_cart);
-            if(Mysqli_num_rows($check_cart_ex) > 0){
-                echo "<script>alert('Product already in cart');</script>";
-            }else{
-                $add = "INSERT INTO cart (u_id,p_id,c_name,c_image,c_quantity,c_price) VALUES ('$uid','$pid','$cart_name','$cart_image','$quantity','$cart_total')";
-                $cart_query = mysqli_query($con,$add);
-                if($cart_query){
-                    echo "<script>alert('Add to cart')</script>";
-                }
-                else{
-                    echo "<script>alert('Some error')</script>";
-                }
-            }
-          
+// Add to cart
+if (isset($_POST['cart'])) {
+    if (!isset($_SESSION['user']['u_id'])) {
+        echo "<script>window.location.href='login.php';</script>";
+        exit();
+    }
+    $uid        = $_SESSION['user']['u_id'];
+    $pid        = $re['p_id'];
+    $cart_name  = mysqli_real_escape_string($con, $re['p_name']);
+    $cart_image = mysqli_real_escape_string($con, $re['p_image']);
+    $quantity   = 1;
+    $cart_total = $re['p_price_des'];
 
-        }
-    
+    $check_cart    = "SELECT * FROM cart WHERE u_id='$uid' AND c_name='$cart_name'";
+    $check_cart_ex = mysqli_query($con, $check_cart);
+
+    if (mysqli_num_rows($check_cart_ex) > 0) {
+        $cart_msg = "already_in_cart";
+    } else {
+        $add = "INSERT INTO cart (u_id,p_id,c_name,c_image,c_quantity,c_price)
+                VALUES ('$uid','$pid','$cart_name','$cart_image','$quantity','$cart_total')";
+        $cart_query = mysqli_query($con, $add);
+        $cart_msg   = $cart_query ? "added" : "error";
+    }
+}
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to an external CSS file for better organization -->
-    <style>
-        /* Global Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
-    line-height: 1.6;
-}
-
-/* Container for product details */
-.container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-
-/* Product Image Section */
-.img-box {
-    max-width: 100%;
-    height: auto;
-}
-
-.product-image {
-    width: 100%;
-    max-width: 500px; /* Limits the maximum image size */
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds subtle shadow */
-}
-
-/* Product Information Section */
-.detail-box h2 {
-    font-size: 2.2rem;
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.detail-box h5 {
-    font-size: 1.6rem;
-    color: #f7444e;
-    margin-bottom: 20px;
-}
-
-.detail-box p {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 30px;
-}
-
-.buy_section {
-    display: flex;
-    gap: 15px;
-}
-
-.btn {
-    padding: 12px 24px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 1rem;
-    border-radius: 5px;
-    color: white;
-    border: none;
-    cursor: pointer;
-    width: 150px; /* Set fixed width for buttons */
-}
-
-
-button{
-    background:blue;
-    border-radius:7px;
-    padding:20px 30px;
-    background:#f7444e;
-    color:white;
-    outline:none;
-    border-color:#f7444e;
-}
-button:hover{
-    background:white;
-    color:#f7444e;
-    transition:0.4s;
-}
-
-
-.heading_container {
-    margin-bottom: 20px;
-}
-
-.heading_center h3 {
-    font-size: 2.2rem;
-    color: #333;
-    font-weight: bold;
-}
-
-
-    </style>
-</head>
-<body>
-
-<!-- Product details section -->
+<!-- Product Details Section — no extra DOCTYPE, inherits from header.php -->
 <section class="product_details_section">
-    <div class="container">
-        <div class="row">
-            <!-- Product Image -->
-            <div class="col-md-5">
-                <div class="img-box">
-                    <img src="images/<?php echo $re['p_image']; ?>" alt="Product Image" class="product-image">
-                </div>
-            </div>
-            <!-- Product Information -->
-            <div class="col-md-5">
-                <div class="detail-box">
-                    <h2><?php echo $re['p_name']; ?></h2>
-                    <h5 style="text-decoration:line-through">₹ <?php echo $re['p_price_ori']; ?></h5>
-                    <h5>₹ <?php echo $re['p_price_des']; ?></h5>
-                    <p><h5><?php echo $re['p_description']; ?></h5></p>
+   <div class="container">
 
-                    <!-- Add to Cart or Buy Now Button -->
-                    <div class="buy_section">
-                        <form method="post">
-                            <button type="submit" name="cart">Add To Cart</button>
-                        </form>
-                    </div>
-                </div>
+      <?php if (!empty($cart_msg)): ?>
+      <script>
+         window.addEventListener('load', function() {
+            <?php if ($cart_msg === 'added'): ?>
+            showToast('✓ Product added to cart!', 'success');
+            <?php elseif ($cart_msg === 'already_in_cart'): ?>
+            showToast('Product is already in your cart.', 'error');
+            <?php else: ?>
+            showToast('Something went wrong. Please try again.', 'error');
+            <?php endif; ?>
+         });
+      </script>
+      <?php endif; ?>
+
+      <div class="row align-items-center">
+         <!-- Product Image -->
+         <div class="col-md-5">
+            <div class="img-box">
+               <img src="images/<?php echo htmlspecialchars($re['p_image']); ?>" alt="<?php echo htmlspecialchars($re['p_name']); ?>" class="product-image">
             </div>
-        </div>
-    </div>
+         </div>
+
+         <!-- Product Info -->
+         <div class="col-md-7">
+            <div class="detail-box" style="padding: 20px 40px;">
+
+               <div style="margin-bottom:16px">
+                  <span style="font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold)">Mirecal Collection</span>
+               </div>
+
+               <h2><?php echo htmlspecialchars($re['p_name']); ?></h2>
+
+               <div style="display:flex;align-items:center;gap:16px;margin:16px 0;">
+                  <?php if (!empty($re['p_price_ori']) && $re['p_price_ori'] > $re['p_price_des']): ?>
+                  <h5 class="strikethrough">₹<?php echo number_format($re['p_price_ori'], 2); ?></h5>
+                  <?php endif; ?>
+                  <h5 style="font-size:1.8rem;color:var(--gold)">₹<?php echo number_format($re['p_price_des'], 2); ?></h5>
+                  <?php if (!empty($re['p_price_ori']) && $re['p_price_ori'] > $re['p_price_des']):
+                     $discount = round((($re['p_price_ori'] - $re['p_price_des']) / $re['p_price_ori']) * 100); ?>
+                  <span style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);color:var(--gold);font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px">
+                     <?php echo $discount; ?>% OFF
+                  </span>
+                  <?php endif; ?>
+               </div>
+
+               <?php if (!empty($re['p_description'])): ?>
+               <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:24px">
+                  <p style="color:var(--text);font-size:0.93rem;line-height:1.8"><?php echo nl2br(htmlspecialchars($re['p_description'])); ?></p>
+               </div>
+               <?php endif; ?>
+
+               <?php if (!empty($re['p_quantity'])): ?>
+               <div style="margin-bottom:20px;font-size:0.85rem;color:var(--text-dim)">
+                  <?php if ($re['p_quantity'] > 0): ?>
+                  <span style="color:#22c55e">✓ In Stock</span> &nbsp;(<?php echo $re['p_quantity']; ?> units available)
+                  <?php else: ?>
+                  <span style="color:#ef4444">✗ Out of Stock</span>
+                  <?php endif; ?>
+               </div>
+               <?php endif; ?>
+
+               <div class="buy_section" style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; align-items: center;">
+                  <form method="post" style="margin: 0;">
+                     <button type="submit" name="cart" class="btn1">
+                        🛍 Add To Cart
+                     </button>
+                  </form>
+                  <a href="product.php" class="btn2">
+                     ← Back to Products
+                  </a>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
 </section>
 
-
-<?php
-    include('footer.php');
-?>
-
-</body>
-</html>
+<?php include('footer.php'); ?>
